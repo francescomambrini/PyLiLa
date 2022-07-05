@@ -1,22 +1,14 @@
-from SPARQLWrapper import SPARQLWrapper, JSON, XML, CSV, TURTLE
+import requests
 import logging
 
 LILA_SPARQL_URL = "https://lila-erc.eu/sparql/lila_knowledge_base/sparql"
+ACCEPTED_OUT_FORMATS = ['ttl', 'xml', 'json', 'html', 'csv', 'tsv']
 
 
 def query(query_string, out_format='json'):
-    dic_out = {'json': JSON, 'xml': XML, 'ttl': TURTLE, 'turtle': TURTLE, 'csv': CSV}
-    sparql = SPARQLWrapper(LILA_SPARQL_URL)
-    try:
-        sparql.setReturnFormat(dic_out[out_format])
-    except KeyError:
-        raise ValueError(f"Outpout format must be one of: {', '.join(dic_out.keys())}")
+    if out_format not in ACCEPTED_OUT_FORMATS:
+        raise ValueError(f'Output format must be one of: {", ".join(ACCEPTED_OUT_FORMATS)}')
 
-    sparql.setQuery(query_string)
-    try:
-        ret = sparql.queryAndConvert()
-    except Exception as e:
-        logging.error(e)
-        return None
-    return ret
-
+    para = {'query': query_string, 'format': out_format}
+    res = requests.get(LILA_SPARQL_URL, params=para)
+    return res
