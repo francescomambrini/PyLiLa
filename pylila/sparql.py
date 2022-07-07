@@ -11,4 +11,7 @@ def query(query_string, out_format='json'):
 
     para = {'query': query_string, 'format': out_format}
     res = requests.get(LILA_SPARQL_URL, params=para)
+    if res.status_code != 200:
+        logging.error(f"Server returned status: {res.status_code}")
+        res = None
     return res
