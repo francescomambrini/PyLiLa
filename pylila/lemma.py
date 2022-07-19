@@ -114,11 +114,3 @@ class Lemma(LiLaRes):
             ''' % str(self.uri)
         return self._get_uris_from_sparql(q, 'tok')
 
-    def load_graph(self):
-        q = '''CONSTRUCT { <%s> ?p ?o } where {
-                <%s> ?p ?o }''' % (str(self.uri), str(self.uri))
-        res = query(q, out_format='ttl')
-        if not res:
-            logging.error(f'Lemma not found in the Lemma Bank')
-            return None
-        self.graph.parse(data=res.text)

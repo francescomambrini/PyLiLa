@@ -14,8 +14,8 @@ class LiLaRes:
         q = '''CONSTRUCT { <%s> ?p ?o } where {
                 <%s> ?p ?o }''' % (str(self.uri), str(self.uri))
         res = query(q, out_format='ttl')
-        if not res:
-            logging.error(f'Lemma not found in the Lemma Bank')
+        if res.text == '# Empty TURTLE\n':
+            logging.error(f'Resource not found in LiLa')
             return None
         self.graph.parse(data=res.text)
 
