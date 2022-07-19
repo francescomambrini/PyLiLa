@@ -17,6 +17,7 @@ powla = Namespace('http://purl.org/powla/powla.owl#')
 written_rep = ontolex.writtenRep
 has_lemma = lila.hasLemma
 has_string_value = powla.hasStringValue
+canonical_form = ontolex.canonicalForm
 
 # classes
 lexical_entry = ontolex.LexicalEntry

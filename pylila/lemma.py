@@ -1,5 +1,6 @@
 import logging
 from pylila.sparql import query
+from pylila.resources import LiLaRes
 from rdflib import Graph, URIRef
 from pylila.urirefs import (written_rep, lila)
 
@@ -38,32 +39,35 @@ def _validate_lemma_uri(uri):
     return uri
 
 
-class Lemma:
+class Lemma(LiLaRes):
     def __init__(self, uri):
-        uri = _validate_lemma_uri(uri)
-        self.uri = URIRef(uri)
-        self.graph = Graph()
-        self.load_graph()
+        super().__init__(_validate_lemma_uri(uri))
 
     @property
     def written_representations(self):
-        return tuple([str(rpr) for rpr in self.graph.objects(self.uri, written_rep)])
+        """
+        The Lemma's Written representations
+
+        :return: a tuple of written representations
+        :rtype: tuple of rdflib.Literal
+        """
+        return tuple([rpr for rpr in self.graph.objects(self.uri, written_rep)])
 
     @property
     def lexical_bases(self):
-        return tuple([str(b) for b in self.graph.objects(self.uri, lila.hasBase)])
+        return self._get_objects_from_graph(lila.hasBase)
 
     @property
     def prefixes(self):
-        return tuple([str(p) for p in self.graph.objects(self.uri, lila.hasPrefix)])
+        return self._get_objects_from_graph(lila.hasPrefix)
 
     @property
     def suffixes(self):
-        return tuple([str(p) for p in self.graph.objects(self.uri, lila.hasSuffix)])
+        return self._get_objects_from_graph(lila.hasSuffix)
 
     @property
     def lemma_variants(self):
-        return tuple([str(lv) for lv in self.graph.objects(self.uri, lila.lemmaVariant)])
+        return self._get_objects_from_graph(lila.lemmaVariant)
 
     @property
     def pos(self):
@@ -73,7 +77,7 @@ class Lemma:
         elif len(pos) == 0:
             logging.error(f"{self.uri} has no POS!")
             return None
-        return str(pos[0])
+        return pos[0]
 
     @property
     def inflection_type(self):
@@ -83,7 +87,7 @@ class Lemma:
         elif len(it) == 0:
             logging.warning(f"{self.uri} has no Inflection Type!")
             return None
-        return str(it[0])
+        return it[0]
 
     def get_hypolemmas(self):
         q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
@@ -98,6 +102,13 @@ class Lemma:
         return self._get_uris_from_sparql(q, 'lexentry')
 
     def get_tokens(self):
+        """
+        Retrieves the URIs of all tokens (from all corpora) connected to the lemma.
+        Returns an empty list if no match is found.
+
+        :return: list of Token URIs, or empty list
+        :rtype: list of rdflib.terms.URIRef
+        """
         q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
             SELECT ?tok where { ?tok lila:hasLemma <%s> . }
             ''' % str(self.uri)
@@ -111,8 +122,3 @@ class Lemma:
             logging.error(f'Lemma not found in the Lemma Bank')
             return None
         self.graph.parse(data=res.text)
-
-    @staticmethod
-    def _get_uris_from_sparql(qstr, colname):
-        res = query(qstr)
-        return [h[colname]['value'] for h in res.json()['results']['bindings']]
