@@ -1,0 +1,13 @@
+@prefix lilaLemma:    <http://lila-erc.eu/data/id/lemma/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix lila: <http://lila-erc.eu/ontologies/lila/> .
+@prefix ontolex:      <http://www.w3.org/ns/lemon/ontolex#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+lilaLemma:114954  rdf:type      lila:Lemma ;
+        rdfs:label              "omnis" ;
+        lila:hasBase            <http://lila-erc.eu/data/id/base/2446> ;
+        lila:hasDegree          lila:positive ;
+        lila:hasInflectionType  lila:n7 ;
+        lila:hasPOS             lila:determiner ;
+        ontolex:writtenRep      "omnis" .
