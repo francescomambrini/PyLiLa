@@ -35,9 +35,9 @@ class LexicalEntry(LiLaRes):
         :return: The URI(s) of the connected Lexicon(s)
         :rtype: tuple of rdflib.term.URIRef
         """
-        q = '''PREFIX lime: <http://www.w3.org/ns/lemon/lime#>
-               SELECT ?lexres where { ?lexres lime:entry <%s> . }
-            ''' % str(self.uri)
+        q = f'''PREFIX lime: <http://www.w3.org/ns/lemon/lime#>
+               SELECT ?lexres where {{ ?lexres lime:entry <{str(self.uri)}> . }}
+            '''
         return self._get_uris_from_sparql(q, 'lexres')
 
     @staticmethod

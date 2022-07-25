@@ -20,11 +20,11 @@ def get_all_lemmas(output_format, include_hypolemmas=True):
 
 
 def get_lemmas_by_writtenrep(lemma_string):
-    spql = '''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
-    SELECT ?lemma where {
-       ?lemma ontolex:writtenRep "%s"
-    }
-    ''' % lemma_string
+    spql = f'''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
+    SELECT ?lemma where {{
+       ?lemma ontolex:writtenRep "{lemma_string}"
+    }}
+    '''
     res = query(spql)
     if res:
         return [r['lemma']['value'] for r in res.json()['results']['bindings']]
@@ -103,15 +103,40 @@ class Lemma(LiLaRes):
         return self._generate_string_reps(self.written_representations)
 
     def get_hypolemmas(self):
-        q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
-            SELECT ?hypo where { ?hypo   lila:isHypolemma <%s> . }
-        ''' % str(self.uri)
+        q = f'''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
+            SELECT ?hypo where {{ ?hypo   lila:isHypolemma <{str(self.uri)}> . }}
+        '''
         return self._get_uris_from_sparql(q, 'hypo')
 
+    def _get_lemmas_from_same_affixes(self, affix_type):
+        if affix_type.lower() == 'prefix':
+            p = 'lila:hasPrefix'
+        elif affix_type.lower() == 'suffix':
+            p = 'lila:hasSuffix'
+        elif affix_type.lower() == 'base':
+            p = 'lila:hasBase'
+        else:
+            raise ValueError(f"Type must be one of (prefix, suffix, base); got: {affix_type}")
+        q = f'''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
+        select ?l where {{ 
+          <{str(self.uri)}> {p}/^{p} ?l 
+          filter(?l != <{str(self.uri)}>)
+        }}'''
+        return self._get_uris_from_sparql(q, 'l')
+
+    def get_lemmas_from_same_bases(self):
+        return self._get_lemmas_from_same_affixes(affix_type='base')
+
+    def get_lemmas_from_same_prefixes(self):
+        return self._get_lemmas_from_same_affixes('prefix')
+
+    def get_lemmas_from_same_suffixes(self):
+        return self._get_lemmas_from_same_affixes('suffix')
+
     def get_lexical_entries(self):
-        q = '''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
-               SELECT ?lexentry where { ?lexentry ontolex:canonicalForm <%s> . }
-            ''' % str(self.uri)
+        q = f'''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
+               SELECT ?lexentry where {{ ?lexentry ontolex:canonicalForm <{str(self.uri)}> . }}
+            '''
         return self._get_uris_from_sparql(q, 'lexentry')
 
     def get_tokens(self):
@@ -122,9 +147,9 @@ class Lemma(LiLaRes):
         :return: list of Token URIs, or empty list
         :rtype: list of rdflib.terms.URIRef
         """
-        q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
-            SELECT ?tok where { ?tok lila:hasLemma <%s> . }
-            ''' % str(self.uri)
+        q = f'''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
+            SELECT ?tok where {{ ?tok lila:hasLemma <{str(self.uri)}> . }}
+            '''
         return self._get_uris_from_sparql(q, 'tok')
 
 

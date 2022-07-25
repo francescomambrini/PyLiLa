@@ -14,13 +14,23 @@ class LiLaRes:
             self.graph = graph
 
     def load_graph(self):
-        q = '''CONSTRUCT { <%s> ?p ?o } where {
-                <%s> ?p ?o }''' % (str(self.uri), str(self.uri))
+        q = f'''CONSTRUCT {{ <{str(self.uri)}> ?p ?o }} where {{
+                <{str(self.uri)}> ?p ?o }}'''
         res = query(q, out_format='ttl')
         if res.text == '# Empty TURTLE\n':
             logging.error(f'Resource not found in LiLa')
             return None
         self.graph.parse(data=res.text)
+
+    def get_inverse_graph(self):
+        q = f'''CONSTRUCT {{ ?s ?p <{str(self.uri)}> }} where {{
+                        ?s ?p <{str(self.uri)}> }}'''
+        res = query(q, out_format='ttl')
+        if res.text == '# Empty TURTLE\n':
+            logging.error(f'Resource not found in LiLa')
+            return None
+        g = Graph()
+        return g.parse(data=res.text)
 
     @property
     def labels(self):

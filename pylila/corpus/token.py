@@ -49,19 +49,19 @@ class Token(LiLaRes):
         return self._get_uris_from_sparql(q, 'rel')
 
     def get_document(self):
-        q = '''PREFIX lilaCorpora: <http://lila-erc.eu/ontologies/lila_corpora/>
+        q = f'''PREFIX lilaCorpora: <http://lila-erc.eu/ontologies/lila_corpora/>
             PREFIX powla: <http://purl.org/powla/powla.owl#>
-            select ?doc where {
-              <%s> powla:hasLayer/powla:hasDocument ?doc
-            }''' % str(self.uri)
+            select ?doc where {{
+              <{str(self.uri)}> powla:hasLayer/powla:hasDocument ?doc
+            }}'''
         return self._get_uris_from_sparql(q, 'doc')
 
     def get_corpus(self):
-        q = '''PREFIX lilaCorpora: <http://lila-erc.eu/ontologies/lila_corpora/>
+        q = f'''PREFIX lilaCorpora: <http://lila-erc.eu/ontologies/lila_corpora/>
             PREFIX powla: <http://purl.org/powla/powla.owl#>
-            select ?corpus where {
-              <%s> powla:hasLayer/powla:hasDocument/^powla:hasSubDocument ?corpus
-            }''' % str(self.uri)
+            select ?corpus where {{
+              <{str(self.uri)}> powla:hasLayer/powla:hasDocument/^powla:hasSubDocument ?corpus
+            }}'''
         return self._get_uris_from_sparql(q, 'doc')
 
 
@@ -72,10 +72,10 @@ class LiLaCorpus(LiLaRes):
 
 class LiLaDocument(LiLaRes):
     def get_tokens(self):
-        q = '''PREFIX powla: <http://purl.org/powla/powla.owl#>
-            select ?tok where {
-              ?layer powla:hasDocument  <%s> ;
+        q = f'''PREFIX powla: <http://purl.org/powla/powla.owl#>
+            select ?tok where {{
+              ?layer powla:hasDocument  <{str(self.uri)}> ;
                    ^powla:hasLayer ?tok .
               ?tok a powla:Terminal
-            }''' % str(self.uri)
+            }}'''
         return self._get_uris_from_sparql(q, "tok")
