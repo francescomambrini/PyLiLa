@@ -6,8 +6,8 @@ from pylila.urirefs import (ontolex, lila, canonical_form)
 
 
 class LexicalEntry(LiLaRes):
-    def __init__(self, uri):
-        super().__init__(self._validate_uri(uri))
+    def __init__(self, uri, graph=None):
+        super().__init__(self._validate_uri(uri), graph=graph)
 
     @property
     def lemma(self):

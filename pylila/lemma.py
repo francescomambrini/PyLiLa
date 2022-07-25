@@ -5,14 +5,18 @@ from rdflib import Graph, URIRef
 from pylila.urirefs import (written_rep, lila)
 
 
-def get_all_lemmas(output_format):
+def get_all_lemmas(output_format, include_hypolemmas=True):
     q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
             select ?lemma {
-              { ?lemma a lila:Lemma }
-              union
+              { ?lemma a lila:Lemma }              
+        '''
+    if include_hypolemmas:
+        q += '''union
               { ?lemma a lila:Hypolemma }
-        }'''
+              '''
+    q += '}'
     lms = query(q, output_format)
+    return lms
 
 
 def get_lemmas_by_writtenrep(lemma_string):
@@ -28,20 +32,9 @@ def get_lemmas_by_writtenrep(lemma_string):
         return []
 
 
-def _validate_lemma_uri(uri):
-    lb_base = 'http://lila-erc.eu/data/id/lemma/'
-    if uri.isnumeric():
-        uri = lb_base + uri
-        logging.debug("Replaced numeric ID with full http URI for lemmas (doesn't work with hypo's)")
-    if uri.startswith('https://lila-erc.eu/'):
-        uri = uri.replace('https://lila-erc.eu/', 'http://lila-erc.eu/')
-        logging.debug("Lemma bank URIs use the http protocol, not https!")
-    return uri
-
-
 class Lemma(LiLaRes):
-    def __init__(self, uri):
-        super().__init__(_validate_lemma_uri(uri))
+    # def __init__(self, uri, graph=None):
+    #     super().__init__(_validate_lemma_uri(uri), graph=graph)
 
     @property
     def written_representations(self):
@@ -89,6 +82,26 @@ class Lemma(LiLaRes):
             return None
         return it[0]
 
+    def _validate_uri(self, uri, l_type='lemma'):
+        lb_base = f'http://lila-erc.eu/data/id/{l_type}/'
+        if uri.isnumeric():
+            uri = lb_base + uri
+            logging.debug("Replaced numeric ID with full http URI for lemmas (doesn't work with hypo's)")
+
+        uri = super()._validate_uri(uri)
+
+        return uri
+
+    def get_written_representations(self):
+        """
+        Generates a string version of the Lemma's written representations. If there's more than one written rep,
+        it joins them with a comma
+
+        :return: written representation(s) as a string
+        :rtype: str
+        """
+        return self._generate_string_reps(self.written_representations)
+
     def get_hypolemmas(self):
         q = '''PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
             SELECT ?hypo where { ?hypo   lila:isHypolemma <%s> . }
@@ -114,3 +127,11 @@ class Lemma(LiLaRes):
             ''' % str(self.uri)
         return self._get_uris_from_sparql(q, 'tok')
 
+
+class Hypolemma(Lemma):
+    
+    def _validate_uri(self, uri, l_type='hypolemma'):
+        return super(Hypolemma, self)._validate_uri(uri, l_type)
+    
+    def get_hyperlemma(self):
+        pass
