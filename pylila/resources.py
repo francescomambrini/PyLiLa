@@ -82,3 +82,20 @@ class LiLaRes:
         with open(rdf_path) as f:
             rdf_string = f.read()
         return cls.from_string(rdf_string)
+
+
+class LiLaLemmaBank(LiLaRes):
+
+    def __init__(self):
+        super().__init__('http://lila-erc.eu/data/id/lemma/LemmaBank')
+
+    def select_random_sample(self, limit=5):
+        q = f'''PREFIX dcterms: <http://purl.org/dc/terms/>
+        SELECT ?l WHERE {{
+            ?l dcterms:isPartOf <http://lila-erc.eu/data/id/lemma/LemmaBank> 
+            BIND(RAND() AS ?sortKey)
+            }}
+            ORDER BY ?sortKey
+            LIMIT {limit}
+        '''
+        return self._get_uris_from_sparql(q, 'l')
