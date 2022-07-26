@@ -10,3 +10,5 @@ to illustrate how the code is supposed to work.
 
 At the moment, just clone the repo and add the project 
 root to your `PYTHONPATH`.
+
+You need python3 (I tested it on Python 3.8), `rdflib` and `requests` to run the code: see `requirements.txt`.
