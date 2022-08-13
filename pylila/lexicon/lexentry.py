@@ -32,13 +32,18 @@ class LexicalEntry(LiLaRes):
             concepts = self.concepts
         if type(concepts) == str:
             concepts = [concepts]
+        cps = [f'<{lc}>' for lc in concepts]
         nl = '\n'
-        q = f'''select ?lc ?def where {{
-                  VALUES ?lc {{ {nl.join(concepts)} 
+        q = f'''PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                select ?lc ?def where {{
+                  VALUES ?lc {{ {nl.join(cps)}
                 }}
                 ?lc skos:definition ?def
                 }}
         '''
+        res = query(q)
+        defs = [(r['lc']['value'], r['def']['value']) for r in res.json()['results']['bindings'] ]
+        return defs
 
     def get_lexicons(self):
         """
