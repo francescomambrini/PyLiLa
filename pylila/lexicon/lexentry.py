@@ -27,6 +27,19 @@ class LexicalEntry(LiLaRes):
     def get_forms(self, obj_property=ontolex.otherForm):
         return self._get_objects_from_graph(obj_property)
 
+    def get_concepts_and_definitions(self, concepts=None):
+        if not concepts:
+            concepts = self.concepts
+        if type(concepts) == str:
+            concepts = [concepts]
+        nl = '\n'
+        q = f'''select ?lc ?def where {{
+                  VALUES ?lc {{ {nl.join(concepts)} 
+                }}
+                ?lc skos:definition ?def
+                }}
+        '''
+
     def get_lexicons(self):
         """
         Every Lexical Entry in LiLa belongs to at least one lime:Lexicon.

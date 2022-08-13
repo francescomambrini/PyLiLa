@@ -86,8 +86,8 @@ class LiLaRes:
 
 class LiLaLemmaBank(LiLaRes):
 
-    def __init__(self):
-        super().__init__('http://lila-erc.eu/data/id/lemma/LemmaBank')
+    def __init__(self, graph=None):
+        super().__init__('http://lila-erc.eu/data/id/lemma/LemmaBank', graph=graph)
 
     def select_random_sample(self, limit=5):
         q = f'''PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -99,3 +99,9 @@ class LiLaLemmaBank(LiLaRes):
             LIMIT {limit}
         '''
         return self._get_uris_from_sparql(q, 'l')
+
+    @classmethod
+    def from_file(cls, lemma_bank_path):
+        g = Graph()
+        g.parse(lemma_bank_path)
+        return cls(graph=g)

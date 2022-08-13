@@ -84,8 +84,8 @@ class Lemma(LiLaRes):
 
     def _validate_uri(self, uri, l_type='lemma'):
         lb_base = f'http://lila-erc.eu/data/id/{l_type}/'
-        if uri.isnumeric():
-            uri = lb_base + uri
+        if str(uri).isnumeric():
+            uri = lb_base + str(uri)
             logging.debug("Replaced numeric ID with full http URI for lemmas (doesn't work with hypo's)")
 
         uri = super()._validate_uri(uri)
