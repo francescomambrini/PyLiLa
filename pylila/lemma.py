@@ -3,6 +3,7 @@ from pylila.sparql import query
 from pylila.resources import LiLaRes
 from rdflib import Graph, URIRef
 from pylila.urirefs import (written_rep, lila)
+from pylila.pos import upos_lila_mapping
 
 
 def get_all_lemmas(output_format, include_hypolemmas=True):
@@ -22,7 +23,22 @@ def get_all_lemmas(output_format, include_hypolemmas=True):
 def get_lemmas_by_writtenrep(lemma_string):
     spql = f'''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
     SELECT ?lemma where {{
-       ?lemma ontolex:writtenRep "{lemma_string}"
+       ?lemma ontolex:writtenRep "{lemma_string}"@la
+    }}
+    '''
+    res = query(spql)
+    if res:
+        return [r['lemma']['value'] for r in res.json()['results']['bindings']]
+    else:
+        return []
+    
+def get_lemmas_by_writtenrep_upos(lemma_string, upos):
+    pos = upos_lila_mapping.get(upos, 'http://lila-erc.eu/ontologies/lila/other') 
+    spql = f'''PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
+    PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
+    SELECT ?lemma where {{
+       ?lemma ontolex:writtenRep "{lemma_string}" ;
+            lila:hasPOS <{pos}>
     }}
     '''
     res = query(spql)

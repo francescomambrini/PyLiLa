@@ -34,7 +34,7 @@ class LexicalEntry(LiLaRes):
             concepts = [concepts]
         cps = [f'<{lc}>' for lc in concepts]
         nl = '\n'
-        q = f'''PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        q = f'''PREFIX skos: <http://www.w3.org/2004/02/skos#>
                 select ?lc ?def where {{
                   VALUES ?lc {{ {nl.join(cps)}
                 }}
